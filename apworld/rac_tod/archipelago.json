@@ -1,0 +1,8 @@
+{
+  "game": "Ratchet and Clank Tools of Destruction",
+  "world_version": "0.9.1",
+  "minimum_ap_version": "0.6.0",
+  "version": 7,
+  "compatible_version": 7,
+  "authors": ["Snokayy"]
+}

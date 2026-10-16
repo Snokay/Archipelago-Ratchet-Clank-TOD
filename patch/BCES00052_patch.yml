@@ -1,0 +1,143 @@
+Version: 1.2
+
+PPU-c4e26433d1eed9166eb0c67b6f66b2268f3704e2:
+  "Archipelago":
+    Games:
+      "Ratchet & Clank Future: Tools of Destruction":
+        BCES00052: [ 01.00 ]
+    Author: "Snokayy"
+    Notes: "v0.6 (2026-10-15) : boîte aux lettres en 0x7F000000. +0x04 = compteur d'images. Message : texte UTF-8 en +0x100, durée (float, s) en +0x14, puis 1 en +0x10 (hud->vfunc[0x44] du jeu). Voyage : numéro du niveau en +0x18, puis 2 en +0x10 (load_level du jeu, 0x373A8, seulement dans la carte galactique) ou 3 en +0x10 (voyage direct : niveau demandé [0x101AFCE0]+0x3C puis exit_galactic_map 0x35340, carte ouverte seulement) ; 4 en +0x10 = ouvrir la carte galactique depuis n'importe où (0x35400(1, 1) ; validé : le choix d'une planète lance le voyage)."
+    Patch Version: 0.6
+    Patch:
+      - [ alloc, 0x7F000002, 0x1000 ]        # 0x7F000000, 4 Ko ; RPCS3 lit la protection par adresse % 3 : 0 = lecture + écriture + exécution
+      - [ calloc, 0x5A7F80, 0x6B ]              # crochet : après la lecture de la manette (1 fois par image, fil principal)
+      - [ be32, 0x0, 0xE8410028 ]  # ld r2, 0x28(r1)  (instruction d'origine)
+      - [ be32, 0x0, 0x3D607F00 ]  # lis r11, 0x7F00
+      - [ be32, 0x0, 0x818B0004 ]  # lwz r12, 4(r11)
+      - [ be32, 0x0, 0x398C0001 ]  # addi r12, r12, 1
+      - [ be32, 0x0, 0x918B0004 ]  # stw r12, 4(r11)  (compteur d'images)
+      - [ be32, 0x0, 0x818B0010 ]  # lwz r12, 0x10(r11)  (demande : 1 = message, 2 = voyage)
+      - [ be32, 0x0, 0x2C0C0000 ]  # cmpwi r12, 0
+      - [ be32, 0x0, 0x41820190 ]  # beq fin
+      - [ be32, 0x0, 0x7D8A6378 ]  # mr r10, r12
+      - [ be32, 0x0, 0x39800000 ]  # li r12, 0
+      - [ be32, 0x0, 0x918B0010 ]  # stw r12, 0x10(r11)  (demande prise)
+      - [ be32, 0x0, 0xF821FF81 ]  # stdu r1, -0x80(r1)
+      - [ be32, 0x0, 0x7C0802A6 ]  # mflr r0
+      - [ be32, 0x0, 0xF8010090 ]  # std r0, 0x90(r1)
+      - [ be32, 0x0, 0xF8610070 ]  # std r3, 0x70(r1)
+      - [ be32, 0x0, 0x2C0A0002 ]  # cmpwi r10, 2
+      - [ be32, 0x0, 0x41820090 ]  # beq voyage
+      - [ be32, 0x0, 0x2C0A0003 ]  # cmpwi r10, 3
+      - [ be32, 0x0, 0x41820124 ]  # beq direct
+      - [ be32, 0x0, 0x2C0A0004 ]  # cmpwi r10, 4
+      - [ be32, 0x0, 0x418200F0 ]  # beq carte
+      - [ be32, 0x0, 0x2C0A0005 ]  # cmpwi r10, 5
+      - [ be32, 0x0, 0x418200A0 ]  # beq clank
+      - [ be32, 0x0, 0x2C0A0006 ]  # cmpwi r10, 6
+      - [ be32, 0x0, 0x41820098 ]  # beq clank
+      - [ be32, 0x0, 0x3C60101D ]  # lis r3, 0x101D
+      - [ be32, 0x0, 0x80635C88 ]  # lwz r3, 0x5C88(r3)  ([0x101D5C88])
+      - [ be32, 0x0, 0x2C030000 ]  # cmpwi r3, 0
+      - [ be32, 0x0, 0x4182012C ]  # beq sortie
+      - [ be32, 0x0, 0x3C630001 ]  # addis r3, r3, 1
+      - [ be32, 0x0, 0x38638D5C ]  # addi r3, r3, -0x72A4  (hud = [0x101D5C88] + 0x8D5C)
+      - [ be32, 0x0, 0x81230000 ]  # lwz r9, 0(r3)  (vtable)
+      - [ be32, 0x0, 0x3D800084 ]  # lis r12, 0x84
+      - [ be32, 0x0, 0x618CC4D8 ]  # ori r12, r12, 0xC4D8
+      - [ be32, 0x0, 0x7C096000 ]  # cmpw r9, r12
+      - [ be32, 0x0, 0x40820110 ]  # bne sortie
+      - [ be32, 0x0, 0x81890044 ]  # lwz r12, 0x44(r9)  (méthode afficher)
+      - [ be32, 0x0, 0x3C807F00 ]  # lis r4, 0x7F00
+      - [ be32, 0x0, 0x38840100 ]  # addi r4, r4, 0x100  (texte)
+      - [ be32, 0x0, 0xC02B0014 ]  # lfs f1, 0x14(r11)  (durée)
+      - [ be32, 0x0, 0x38C0FFFF ]  # li r6, -1
+      - [ be32, 0x0, 0x38E00000 ]  # li r7, 0
+      - [ be32, 0x0, 0x39000000 ]  # li r8, 0
+      - [ be32, 0x0, 0x39200000 ]  # li r9, 0
+      - [ be32, 0x0, 0x39400001 ]  # li r10, 1
+      - [ be32, 0x0, 0x800C0000 ]  # lwz r0, 0(r12)
+      - [ be32, 0x0, 0x7C0903A6 ]  # mtctr r0
+      - [ be32, 0x0, 0xF8410028 ]  # std r2, 0x28(r1)
+      - [ be32, 0x0, 0x804C0004 ]  # lwz r2, 4(r12)
+      - [ be32, 0x0, 0x4E800421 ]  # bctrl
+      - [ be32, 0x0, 0xE8410028 ]  # ld r2, 0x28(r1)
+      - [ be32, 0x0, 0x480000D0 ]  # b sortie
+      - [ be32, 0x0, 0x806B0018 ]  # lwz r3, 0x18(r11)  (numéro du niveau)  <- voyage
+      - [ be32, 0x0, 0x3D800003 ]  # lis r12, 0x3
+      - [ be32, 0x0, 0x618C73A8 ]  # ori r12, r12, 0x73A8  (load_level)
+      - [ be32, 0x0, 0x7D8903A6 ]  # mtctr r12
+      - [ be32, 0x0, 0xF8410028 ]  # std r2, 0x28(r1)
+      - [ be32, 0x0, 0x3C400088 ]  # lis r2, 0x88
+      - [ be32, 0x0, 0x6042FF38 ]  # ori r2, r2, 0xFF38  (TOC de load_level)
+      - [ be32, 0x0, 0x4E800421 ]  # bctrl
+      - [ be32, 0x0, 0xE8410028 ]  # ld r2, 0x28(r1)
+      - [ be32, 0x0, 0x480000A8 ]  # b sortie
+      - [ be32, 0x0, 0x3C601072 ]  # lis r3, 0x1072  <- clank
+      - [ be32, 0x0, 0x80634C34 ]  # lwz r3, 0x4C34(r3)  ([0x10724C34])
+      - [ be32, 0x0, 0x2C030000 ]  # cmpwi r3, 0
+      - [ be32, 0x0, 0x41820098 ]  # beq sortie
+      - [ be32, 0x0, 0x3863EFD4 ]  # addi r3, r3, -0x102C  (objet de comportement de Ratchet, classe 0x211)
+      - [ be32, 0x0, 0x3D80001E ]  # lis r12, 0x1E
+      - [ be32, 0x0, 0x2C0A0005 ]  # cmpwi r10, 5
+      - [ be32, 0x0, 0x4082000C ]  # bne ajout
+      - [ be32, 0x0, 0x618C3F58 ]  # ori r12, r12, 0x3F58  (commande 5 : retirer Clank du dos)
+      - [ be32, 0x0, 0x48000008 ]  # b appelclank
+      - [ be32, 0x0, 0x618C2408 ]  # ori r12, r12, 0x2408  (commande 6 : remettre Clank)  <- ajout
+      - [ be32, 0x0, 0x7D8903A6 ]  # mtctr r12  <- appelclank
+      - [ be32, 0x0, 0xF8410028 ]  # std r2, 0x28(r1)
+      - [ be32, 0x0, 0x3C400088 ]  # lis r2, 0x88
+      - [ be32, 0x0, 0x6042FF38 ]  # ori r2, r2, 0xFF38
+      - [ be32, 0x0, 0x4E800421 ]  # bctrl
+      - [ be32, 0x0, 0xE8410028 ]  # ld r2, 0x28(r1)
+      - [ be32, 0x0, 0x48000060 ]  # b sortie
+      - [ be32, 0x0, 0x38600001 ]  # li r3, 1  <- carte
+      - [ be32, 0x0, 0x38800001 ]  # li r4, 1  (0x35400(1, 1) : ouvre la carte ; G+0x40 = 1 -> le choix d'une planète lance le voyage)
+      - [ be32, 0x0, 0x3D800003 ]  # lis r12, 0x3
+      - [ be32, 0x0, 0x618C5400 ]  # ori r12, r12, 0x5400
+      - [ be32, 0x0, 0x7D8903A6 ]  # mtctr r12
+      - [ be32, 0x0, 0xF8410028 ]  # std r2, 0x28(r1)
+      - [ be32, 0x0, 0x3C400088 ]  # lis r2, 0x88
+      - [ be32, 0x0, 0x6042FF38 ]  # ori r2, r2, 0xFF38
+      - [ be32, 0x0, 0x4E800421 ]  # bctrl
+      - [ be32, 0x0, 0xE8410028 ]  # ld r2, 0x28(r1)
+      - [ be32, 0x0, 0x48000034 ]  # b sortie
+      - [ be32, 0x0, 0x806B0018 ]  # lwz r3, 0x18(r11)  (numéro du niveau)  <- direct
+      - [ be32, 0x0, 0x3D800089 ]  # lis r12, 0x89
+      - [ be32, 0x0, 0x818C9AAC ]  # lwz r12, -0x6554(r12)  ([0x889AAC] = objet des niveaux G = 0x101AFCE0)
+      - [ be32, 0x0, 0x906C003C ]  # stw r3, 0x3C(r12)  (niveau demandé)
+      - [ be32, 0x0, 0x3D800003 ]  # lis r12, 0x3
+      - [ be32, 0x0, 0x618C5340 ]  # ori r12, r12, 0x5340  (= exit_galactic_map : lance la transition vers le niveau demandé)
+      - [ be32, 0x0, 0x7D8903A6 ]  # mtctr r12
+      - [ be32, 0x0, 0xF8410028 ]  # std r2, 0x28(r1)
+      - [ be32, 0x0, 0x3C400088 ]  # lis r2, 0x88
+      - [ be32, 0x0, 0x6042FF38 ]  # ori r2, r2, 0xFF38
+      - [ be32, 0x0, 0x4E800421 ]  # bctrl
+      - [ be32, 0x0, 0xE8410028 ]  # ld r2, 0x28(r1)
+      - [ be32, 0x0, 0xE8610070 ]  # ld r3, 0x70(r1)  <- sortie
+      - [ be32, 0x0, 0xE8010090 ]  # ld r0, 0x90(r1)
+      - [ be32, 0x0, 0x7C0803A6 ]  # mtlr r0
+      - [ be32, 0x0, 0x38210080 ]  # addi r1, r1, 0x80
+      - [ calloc, 0x2D1670, 0x16 ]              # crochet 2 : entrée de set_level (filtre des niveaux autorisés)
+      - [ be32, 0x0, 0x3D607F00 ]  # lis r11, 0x7F00
+      - [ be32, 0x0, 0x906B0024 ]  # stw r3, 0x24(r11)  (dernier niveau demandé)
+      - [ be32, 0x0, 0x818B0028 ]  # lwz r12, 0x28(r11)
+      - [ be32, 0x0, 0x398C0001 ]  # addi r12, r12, 1
+      - [ be32, 0x0, 0x918B0028 ]  # stw r12, 0x28(r11)  (compteur)
+      - [ be32, 0x0, 0x818B0020 ]  # lwz r12, 0x20(r11)  (masque des niveaux autorisés)
+      - [ be32, 0x0, 0x2C0C0000 ]  # cmpwi r12, 0
+      - [ be32, 0x0, 0x41820038 ]  # beq ok
+      - [ be32, 0x0, 0x7D8C1C30 ]  # srw r12, r12, r3
+      - [ be32, 0x0, 0x718C0001 ]  # andi. r12, r12, 1
+      - [ be32, 0x0, 0x4082002C ]  # bne ok
+      - [ be32, 0x0, 0x906B002C ]  # stw r3, 0x2C(r11)  (niveau bloqué)
+      - [ be32, 0x0, 0x3D80101F ]  # lis r12, 0x101F
+      - [ be32, 0x0, 0x618C03A8 ]  # ori r12, r12, 0x03A8  (table des niveaux 0x101F03A8)
+      - [ be32, 0x0, 0x1C030408 ]  # mulli r0, r3, 0x408
+      - [ be32, 0x0, 0x7D8C0214 ]  # add r12, r12, r0
+      - [ be32, 0x0, 0x38000000 ]  # li r0, 0
+      - [ be32, 0x0, 0x980C0000 ]  # stb r0, 0(r12)  (niveau bloqué caché de la carte : l'histoire vient de l'y mettre)
+      - [ be32, 0x0, 0x39800004 ]  # li r12, 4
+      - [ be32, 0x0, 0x918B0010 ]  # stw r12, 0x10(r11)  (demande : ouvrir la carte galactique)
+      - [ be32, 0x0, 0x4E800020 ]  # blr  (set_level annulé)
+      - [ be32, 0x0, 0x2F840000 ]  # cmpwi cr7, r4, 0  (instruction d'origine)  <- ok

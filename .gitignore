@@ -1,0 +1,13 @@
+# Notes de recherche perso et outils de test : jamais publiés (PLAN.md §6 bis)
+NOTES.md
+PLAN.md
+INVENTAIRE.md
+seeds/
+dist/
+tools/*
+!tools/install.py
+!tools/make_release.py
+patch/mkpatch.py
+patch/patch_lines.txt
+__pycache__/
+*.pyc
