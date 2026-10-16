@@ -15,7 +15,7 @@ from .data import (ARMOR_COUNT, CLANK_COUNT, DEVICE_POOL, FILLER, FILLERS, GADGE
                    OBJ_ITEMS, PLANETS, SPACE_COMBATS, WEAPON_ITEMS, FINAL_REGION)
 from .options import ToDOptions
 
-CLIENT_VERSION = "0.9.1.0"
+CLIENT_VERSION = "0.9.1.1"
 FINAL_PLANETS = ("Igliak",)  # jamais au départ (fin du jeu ; Fastoon final = niveau 18, région de l'objectif)
 
 
@@ -99,6 +99,8 @@ class ToDWorld(World):
         for name, d in LOCATIONS.items():
             if d.kind == "level" and d.value > self.options.player_levels.value:
                 continue
+            if d.kind == "weapon_level" and not self.options.weapon_level_checks:
+                continue
             self.location_count += 1
             r = regions[d.region]
             loc = ToDLocation(self.player, name, d.id, r)
@@ -109,6 +111,9 @@ class ToDWorld(World):
                 loc.access_rule = lambda state, needs=needs: state.has_all(needs, self.player)
             if d.kind == "leviathan":  # ~1 à 3 Léviathans par planète : k-ième = au moins k planètes
                 loc.access_rule = lambda state, k=d.value: state.has_from_list(list(PLANETS), self.player, k)
+            if d.kind == "weapon_level":  # arme reçue + de quoi gagner de l'XP : 2 planètes de plus par niveau
+                loc.access_rule = lambda state, w=d.needs[0], k=d.value % 16: (
+                    state.has(w, self.player) and state.has_from_list(list(PLANETS), self.player, 2 * (k - 1)))
             if d.kind == "level":  # niveau k : environ k / 4 planètes (le départ compte)
                 loc.access_rule = lambda state, k=(d.value + 3) // 4: state.has_from_list(list(PLANETS), self.player, k)
             r.locations.append(loc)
@@ -121,10 +126,11 @@ class ToDWorld(World):
         names = [n for n in PLANETS if n != self.start_planet] + list(SPACE_COMBATS)
         names += ["Progressive Clank"] * CLANK_COUNT + GADGET_ITEMS + OBJ_ITEMS
         names += ["Progressive Armor"] * ARMOR_COUNT
-        room = self.location_count - len(names) - len(self.weapons)
+        copies = 5 if self.options.progressive_weapons else 1  # armes progressives : arme + V2..V5
+        room = (self.location_count - len(names)) // copies - len(self.weapons)
         if room < 0:  # trop d'objets : des armes restent hors du pool (gérées normalement par le jeu)
             self.weapons = self.weapons[:room]
-        names += self.weapons
+        names += self.weapons * copies
         if self.options.device_unlocks and self.location_count - len(names) >= len(DEVICE_POOL):
             self.devices = list(DEVICE_POOL)
             names += self.devices
@@ -147,4 +153,6 @@ class ToDWorld(World):
                 "managed_objs": [ITEMS[n].value for n in OBJ_ITEMS],
                 "managed_weapons": [ITEMS[n].value for n in self.weapons],
                 "clank": True,
-                "goal": "tachyon", "gold_bolts_required": self.options.gold_bolts_required.value}
+                "goal": "tachyon", "gold_bolts_required": self.options.gold_bolts_required.value,
+                "player_levels": self.options.player_levels.value,
+                "progressive_weapons": bool(self.options.progressive_weapons.value)}

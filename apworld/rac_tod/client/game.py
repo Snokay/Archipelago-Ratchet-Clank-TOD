@@ -64,6 +64,7 @@ TACHYON_DEAD = ((0x101F5058, 0x00400000), (0x101F820C, 0x20))  # bits allumés �
 GOLD_BOLT_LOCS = {d.id for d in LOCATIONS.values() if d.kind == "gold_bolt"}
 SCAN_EVERY = 0.5
 PACK, PACK_FLAG = 0x101EFF5C, 0x101EFF58              # pack de Clank équipé (0 hélico, 1 propulseur, 2 hydro)
+WEAPON_CAPS, WEAPON_CONFIG, XP_THRESHOLDS = 0x7F000800, 0x7F000880, 0x234  # crochet 3 (patch v0.7) : plafonds, configs
 HOOK2 = 0x8C0000                                      # 1re instruction du crochet de set_level (patch >= v0.4)
 
 MAILBOX = 0x7F000000           # patch RPCS3 : +4 compteur d'images, +0x10 demande, +0x14 durée, +0x18 argument,
@@ -76,7 +77,7 @@ V02_WEAPONS = [0x03, 0x04, 0x09]  # armes gérées par les seeds v0.2 (sans « m
 LEVEL_OF_PLANET = {name: p.level for name, p in PLANETS.items()}
 LEVEL_OF_ITEM = {name: d.value for name, d in ITEMS.items() if d.kind == "planet"}  # planètes + combats spatiaux
 SPACE_LEVELS = {d.value for d in ITEMS.values() if d.kind == "planet"} - set(LEVEL_OF_PLANET.values())
-SCANNED = [d for d in LOCATIONS.values() if d.kind in ("gold_bolt", "skill", "mission", "statue", "level", "holoplan")]
+SCANNED = [d for d in LOCATIONS.values() if d.kind in ("gold_bolt", "skill", "mission", "statue", "level", "holoplan", "weapon_level")]
 SPACE_COMBAT = {p.level: p.space_combat for p in PLANETS.values() if p.space_combat >= 0}
 WEAPON_PLANET = {d.value: d.region for d in LOCATIONS.values() if d.kind == "vendor_weapon"}
 ARRIVAL_LOC = {d.value: d.id for d in LOCATIONS.values() if d.kind == "arrival"}
@@ -195,6 +196,7 @@ class Game:
         if self.cfg.get("clank"):
             self.clank_tick(received.get("Progressive Clank", 0))
         got_weapons = {ITEMS[n].value for n in received if ITEMS.get(n) and ITEMS[n].kind == "weapon"}
+        self.weapon_caps(received)
         now_open = self.p.read(VENDOR_OPEN) == 1
 
         if now_open and not self.vendor_open:
@@ -265,6 +267,8 @@ class Game:
                 if d.level not in missions:
                     missions[d.level] = self.p.read(MISSIONS_DONE + d.level * MISSIONS_STRIDE + 0x78)
                 hit = missions[d.level] >= d.value
+            elif d.kind == "weapon_level":
+                hit = self.weapon_level_reached(d.value // 16, d.value % 16)
             elif d.kind == "holoplan":
                 hit = holoplans >> d.value & 1
             elif d.kind == "level":
@@ -411,6 +415,32 @@ class Game:
             self.write_list(lst)
             self.log(f"armes : {[hex(w) for w in before]} -> {[hex(w) for w in lst]}")
 
+    def weapon_level_reached(self, w: int, k: int) -> bool:
+        """Vk gagné : niveau de la fiche (+0x11, 0 = V1) ou XP au-dessus du seuil (même si le plafond bloque le niveau).
+        Une arme retirée par le client garde sa fiche d'avant dans self.saved."""
+        fiche = self.saved.get(w) or self.fiche(w)
+        if not self.owned(w) and w not in self.saved:
+            return False
+        if fiche[0x11] >= k - 1 and fiche[0x11] <= 9:
+            return True
+        cfg = self.p.read(WEAPON_CONFIG + 4 * w)
+        if not 0x10000000 <= cfg < 0x11000000:
+            return False
+        xp = struct.unpack(">f", fiche[4:8])[0]
+        seuil = struct.unpack(">f", struct.pack(">I", self.p.read(cfg + XP_THRESHOLDS + 4 * (k - 2))))[0]
+        return 0 < seuil <= xp
+
+    def weapon_caps(self, received: dict[str, int]) -> None:
+        """Armes progressives (patch v0.7, crochet 3) : niveau max = copies reçues (octet boîte + 0x800 + arme :
+        0 = libre, n = niveau max n - 1). Réécrit à chaque tour (la boîte est remise à zéro au démarrage du jeu)."""
+        prog = self.cfg.get("progressive_weapons", False)
+        for n, d in ITEMS.items():
+            if d.kind != "weapon" or d.value not in self.managed_weapons:
+                continue
+            want = min(received.get(n, 0), 5) if prog else 0
+            if self.p.read(WEAPON_CAPS + d.value, READ8) != want:
+                self.p.write(WEAPON_CAPS + d.value, want, WRITE8)
+
     def apply_devices(self, received: dict[str, int], locked_devices: list[int]) -> None:
         """Dispositifs à débloquer : en vente seulement une fois le déblocage reçu (partout, même avant leur
         planète d'origine). Le jeu remet ses propres valeurs au chargement d'une planète : réécrites ici."""
@@ -542,7 +572,7 @@ class Game:
         if not self.patch_ok or self.p.read(MAILBOX + 0x10) != 0:
             return
         text, dur = self.msg_queue.pop(0)
-        raw = text.replace("<", COLOR_ON).replace(">", COLOR_OFF).encode()[:0xEFF] + b"\0"
+        raw = text.replace("<", COLOR_ON).replace(">", COLOR_OFF).encode()[:0x6FF] + b"\0"  # +0x800 : plafonds des armes (crochet 3)
         for i in range(0, len(raw), 4):
             self.p.write(MAILBOX + 0x100 + i, int.from_bytes(raw[i:i + 4].ljust(4, b"\0"), "big"))
         self.p.write(MAILBOX + 0x14, struct.unpack(">I", struct.pack(">f", dur))[0])

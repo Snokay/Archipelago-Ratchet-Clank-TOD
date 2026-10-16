@@ -11,3 +11,5 @@ patch/mkpatch.py
 patch/patch_lines.txt
 __pycache__/
 *.pyc
+!tools/make_poptracker.py
+!tools/pt_art.py

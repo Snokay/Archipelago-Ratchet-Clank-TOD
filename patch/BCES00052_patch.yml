@@ -6,8 +6,8 @@ PPU-c4e26433d1eed9166eb0c67b6f66b2268f3704e2:
       "Ratchet & Clank Future: Tools of Destruction":
         BCES00052: [ 01.00 ]
     Author: "Snokayy"
-    Notes: "v0.6 (2026-10-15) : boîte aux lettres en 0x7F000000. +0x04 = compteur d'images. Message : texte UTF-8 en +0x100, durée (float, s) en +0x14, puis 1 en +0x10 (hud->vfunc[0x44] du jeu). Voyage : numéro du niveau en +0x18, puis 2 en +0x10 (load_level du jeu, 0x373A8, seulement dans la carte galactique) ou 3 en +0x10 (voyage direct : niveau demandé [0x101AFCE0]+0x3C puis exit_galactic_map 0x35340, carte ouverte seulement) ; 4 en +0x10 = ouvrir la carte galactique depuis n'importe où (0x35400(1, 1) ; validé : le choix d'une planète lance le voyage)."
-    Patch Version: 0.6
+    Notes: "v0.7 (2026-10-16) : crochet 3 = niveaux d'arme plafonnés, XP plafonnée au seuil suivant (boîte +0x800 + arme : 0 libre, n = max n-1 ; +0x880 + 4*arme = config, seuils d'XP en +0x234). v0.6 (2026-10-15) : boîte aux lettres en 0x7F000000. +0x04 = compteur d'images. Message : texte UTF-8 en +0x100, durée (float, s) en +0x14, puis 1 en +0x10 (hud->vfunc[0x44] du jeu). Voyage : numéro du niveau en +0x18, puis 2 en +0x10 (load_level du jeu, 0x373A8, seulement dans la carte galactique) ou 3 en +0x10 (voyage direct : niveau demandé [0x101AFCE0]+0x3C puis exit_galactic_map 0x35340, carte ouverte seulement) ; 4 en +0x10 = ouvrir la carte galactique depuis n'importe où (0x35400(1, 1) ; validé : le choix d'une planète lance le voyage)."
+    Patch Version: 0.7
     Patch:
       - [ alloc, 0x7F000002, 0x1000 ]        # 0x7F000000, 4 Ko ; RPCS3 lit la protection par adresse % 3 : 0 = lecture + écriture + exécution
       - [ calloc, 0x5A7F80, 0x6B ]              # crochet : après la lecture de la manette (1 fois par image, fil principal)
@@ -141,3 +141,30 @@ PPU-c4e26433d1eed9166eb0c67b6f66b2268f3704e2:
       - [ be32, 0x0, 0x918B0010 ]  # stw r12, 0x10(r11)  (demande : ouvrir la carte galactique)
       - [ be32, 0x0, 0x4E800020 ]  # blr  (set_level annulé)
       - [ be32, 0x0, 0x2F840000 ]  # cmpwi cr7, r4, 0  (instruction d'origine)  <- ok
+      - [ calloc, 0x465E98, 0x1A ]              # crochet 3 : niveau max des armes (armes progressives)
+      - [ be32, 0x0, 0x3D800046 ]  # lis r12, 0x46
+      - [ be32, 0x0, 0x618C5CB0 ]  # ori r12, r12, 0x5CB0
+      - [ be32, 0x0, 0x7D8903A6 ]  # mtctr r12
+      - [ be32, 0x0, 0x4E800421 ]  # bctrl  (instruction d'origine : bl 0x465CB0, niveau max -> r3)
+      - [ be32, 0x0, 0x809D0000 ]  # lwz r4, 0(r29)  (numéro de l'arme)
+      - [ be32, 0x0, 0x3D607F00 ]  # lis r11, 0x7F00
+      - [ be32, 0x0, 0x548C103A ]  # slwi r12, r4, 2
+      - [ be32, 0x0, 0x7D8B6214 ]  # add r12, r11, r12
+      - [ be32, 0x0, 0x93CC0880 ]  # stw r30, 0x880(r12)  (config de l'arme)
+      - [ be32, 0x0, 0x7D8B2214 ]  # add r12, r11, r4
+      - [ be32, 0x0, 0x898C0800 ]  # lbz r12, 0x800(r12)  (plafond + 1)
+      - [ be32, 0x0, 0x2C0C0000 ]  # cmpwi r12, 0
+      - [ be32, 0x0, 0x41820034 ]  # beq fin
+      - [ be32, 0x0, 0x398CFFFF ]  # addi r12, r12, -1
+      - [ be32, 0x0, 0x7C036040 ]  # cmplw r3, r12
+      - [ be32, 0x0, 0x40810028 ]  # ble fin
+      - [ be32, 0x0, 0x7D836378 ]  # mr r3, r12  (niveau bloqué)
+      - [ be32, 0x0, 0x2C1E0000 ]  # cmpwi r30, 0
+      - [ be32, 0x0, 0x4182001C ]  # beq fin
+      - [ be32, 0x0, 0x558C103A ]  # slwi r12, r12, 2
+      - [ be32, 0x0, 0x7D8CF214 ]  # add r12, r12, r30
+      - [ be32, 0x0, 0xC00C0234 ]  # lfs f0, 0x234(r12)  (seuil du niveau suivant)
+      - [ be32, 0x0, 0xFF9F0000 ]  # fcmpu cr7, f31, f0  (f31 = nouvelle XP, pas encore écrite : stfs en 0x465EA0)
+      - [ be32, 0x0, 0x409D0008 ]  # ble7 fin
+      - [ be32, 0x0, 0xFFE00090 ]  # fmr f31, f0  (XP plafonnée au seuil : la barre reste pleine)
+      - [ be32, 0x0, 0x60000000 ]  # nop  <- fin

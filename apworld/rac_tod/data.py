@@ -193,7 +193,8 @@ FILLER = "Bolts"
 
 class LocDef(NamedTuple):
     id: int
-    kind: str          # "vendor_weapon", "vendor_armor", "leviathan", "gold_bolt", "arrival", "skill", "mission", "statue", "level", "holoplan"
+    kind: str          # "vendor_weapon", "vendor_armor", "leviathan", "gold_bolt", "arrival", "skill", "mission", "statue", "level", "holoplan",
+    #                    "weapon_level"
     value: int         # fiche, numéro d'armure, k-ième Léviathan / mission / statue, bit (boulon d'or, point), niveau
     region: str        # planète, combat spatial ou "Menu" (partout)
     needs: tuple = ()  # objets nécessaires en plus de la région (logique de base, à ajuster en jouant)
@@ -271,6 +272,12 @@ for _region, _count in MISSIONS.items():
 BASE_HP, MAX_LEVEL_CHECKS = 10, 50
 for _k in range(1, MAX_LEVEL_CHECKS + 1):
     LOCATIONS[f"Ratchet Level {_k + 1}"] = LocDef(BASE_ID + 0x1900 + _k, "level", _k, "Menu")
+# Niveaux d'arme (2026-10-16) : « <arme>: V2 » à « V5 » = l'XP de l'arme a passé le seuil (config + 0x234 + 4 * (k - 2),
+# config notée par le crochet 3 du patch v0.7) ou le niveau de la fiche (+0x11) l'a atteint. value = fiche * 16 + k.
+for _w in [n for n, d in ITEMS.items() if d.kind == "weapon"]:
+    for _k in range(2, 6):
+        LOCATIONS[f"{_w}: V{_k}"] = LocDef(BASE_ID + 0x1B00 + ITEMS[_w].value * 8 + _k, "weapon_level",
+                                            ITEMS[_w].value * 16 + _k, "Menu", (_w,))
 # Statues de Tachyon de Mukow (compteur OBJ n° 15).
 for _k in range(1, STATUES + 1):
     LOCATIONS[f"Mukow: Tachyon Statue {_k}"] = LocDef(BASE_ID + 0x1800 + _k, "statue", _k, "Mukow")

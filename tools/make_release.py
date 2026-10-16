@@ -20,6 +20,8 @@ Ratchet and Clank Tools of Destruction:
   device_unlocks: true             # devices missing from the vendor until unlocked
   gold_bolts_required: 10          # 0-31 : gold bolts needed before Fastoon (final) appears
   player_levels: 20                # 0-50 : level-ups that are checks
+  weapon_level_checks: true        # weapon level-ups (V2-V5) are checks
+  progressive_weapons: false       # weapons shuffled 5 times: weapon, then one level each (patch v0.7)
   death_link: false                # not implemented yet
 """
 

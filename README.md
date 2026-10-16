@@ -1,4 +1,4 @@
-# Ratchet & Clank Future: Tools of Destruction Archipelago — alpha 0.9.1.0
+# Ratchet & Clank Future: Tools of Destruction Archipelago — alpha 0.9.1.1
 
 ### 📖 [Setup guide / Guide d'installation](SETUP_GUIDE.md) · ⬇️ [Download / Télécharger](../../releases) · 💬 [Discord](https://discord.gg/yqKUMMkWhr)
 
@@ -14,8 +14,12 @@
 - **Random planets**: you start on a random planet (or the one you choose) and unlock the others as items.
   You travel from anywhere through the galactic map (no need to reach the Aphelion); story trips to a planet
   you do not have yet are stopped and the map opens instead.
-- **About 200 checks**: story missions, skill points, gold bolts, arrival on each planet, weapon and armor
-  vendors, Tachyon statues on Mukow, Leviathan souls, the 13 holo-plans, and Ratchet's level-ups (`player_levels`, 20 by default).
+- **About 280 checks**: story missions, skill points, gold bolts, arrival on each planet, weapon and armor
+  vendors, Tachyon statues on Mukow, Leviathan souls, the 13 holo-plans, Ratchet's level-ups (`player_levels`, 20 by
+  default) and each weapon's level-ups V2 to V5 (`weapon_level_checks`).
+- **Progressive weapons** (`progressive_weapons`, off by default): each weapon is shuffled 5 times. The first copy
+  gives the weapon, each next one allows one more level. A weapon cannot level up past what you received: its XP
+  stops at the next level (full bar) and the level-up check is still sent.
 - **Items**: planets and space combats, gadgets (Heli-Pods, Geo-Laser, Gelanator, Robo-Wings, Gyro-Cycle,
   Holo-Pirate Disguise, Decryptor), Super-Boots, **Progressive Clank** (Clank on your back, then the
   Thruster-Pack), weapons, **Progressive Armor**, device unlocks, bolts and Raritanium.
@@ -25,6 +29,14 @@
   language).
 - **Goal**: defeat Emperor Tachyon on Fastoon. Fastoon (final) appears on the map once you have every planet
   and the number of gold bolts set by `gold_bolts_required`.
+
+## PopTracker
+
+A [PopTracker](https://github.com/black-sliver/PopTracker) pack is attached to each release
+(`RaC_ToD_AP_poptracker_<version>.zip`): drop the zip into PopTracker's `packs` folder, open **Ratchet & Clank:
+Tools of Destruction Archipelago** (Map Tracker or Items Only), click **AP** and enter the room address and your
+slot. Galaxy map with every planet, a panel for gold bolts, holo-plans, skill points and weapon levels, the game's
+level maps, and what is in logic. On level maps the check groups are not at their exact place yet.
 
 ## Requirements
 
@@ -45,6 +57,8 @@ Install: see the **[setup guide](SETUP_GUIDE.md)** (apworld, RPCS3 patch, IPC se
 
 - Code: Snokayy, MIT license (see [LICENSE](LICENSE)). No game file is distributed: the client talks to RPCS3
   through its IPC server (PINE protocol) and the RPCS3 patch contains only our own code.
+- PopTracker pack: item icons, planet pictures and level maps come from the game, through the
+  [Ratchet & Clank Wiki](https://ratchetandclank.fandom.com) (Fandom); the galaxy map and frames are generated.
 - **AI disclosure**: this project was developed with the help of an AI assistant (Claude, Anthropic). The logo,
   emblem and client icon are AI-generated images.
 - Ratchet & Clank is a trademark of Sony Interactive Entertainment; this fan project is not affiliated with Sony
@@ -64,9 +78,12 @@ l'émulateur **RPCS3** : planètes, gadgets, armes et plus sont mélangés avec 
 - **Planètes aléatoires** : départ sur une planète au hasard (ou celle de votre choix), les autres arrivent
   comme objets. Voyage depuis n'importe où par la carte galactique ; les voyages de l'histoire vers une planète
   pas encore reçue sont arrêtés et la carte s'ouvre à la place.
-- **Environ 200 checks** : missions, points de compétence, boulons d'or, arrivée sur chaque planète, vendeurs
-  d'armes et d'armures, statues de Tachyon sur Mukow, âmes de Léviathan, les 13 holoplans, niveaux de Ratchet (`player_levels`,
-  20 par défaut).
+- **Environ 280 checks** : missions, points de compétence, boulons d'or, arrivée sur chaque planète, vendeurs
+  d'armes et d'armures, statues de Tachyon sur Mukow, âmes de Léviathan, les 13 holoplans, niveaux de Ratchet
+  (`player_levels`, 20 par défaut) et niveaux V2 à V5 de chaque arme (`weapon_level_checks`).
+- **Armes progressives** (`progressive_weapons`, désactivé par défaut) : chaque arme est mélangée 5 fois. La 1re
+  copie donne l'arme, chaque suivante autorise un niveau de plus. L'XP s'arrête au niveau suivant (barre pleine)
+  et le check de niveau part quand même.
 - **Objets** : planètes et combats spatiaux, gadgets (Héli-capsules, Géo-laser, Gélanator, Ailorobot,
   Gyro-Cycle, Déguisement holopirate, Décrypteur), Super-bottes, **Clank progressif** (Clank sur le dos, puis le
   propulseur), armes, **armure progressive**, déblocages de dispositifs, boulons et Raritanium.
@@ -75,6 +92,12 @@ l'émulateur **RPCS3** : planètes, gadgets, armes et plus sont mélangés avec 
   français, sinon en anglais).
 - **Objectif** : battre l'empereur Tachyon sur Fastoon. Fastoon (final) apparaît sur la carte quand vous avez
   toutes les planètes et le nombre de boulons d'or réglé par `gold_bolts_required`.
+
+## PopTracker
+
+Un pack [PopTracker](https://github.com/black-sliver/PopTracker) est joint à chaque release : mettez le zip dans
+le dossier `packs` de PopTracker, ouvrez le pack (Map Tracker ou Items Only), cliquez sur **AP** et entrez l'adresse
+de la room et votre slot. Sur les cartes de niveau, les groupes de checks ne sont pas encore à leur place exacte.
 
 ## Prérequis
 
@@ -93,7 +116,9 @@ Installation : voir le **[guide d'installation](SETUP_GUIDE.md)**.
 
 ## Crédits et licence
 
-- Code : Snokayy, licence MIT ([LICENSE](LICENSE)). Aucun fichier du jeu n'est distribué.
+- Code : Snokayy, licence MIT ([LICENSE](LICENSE)). Aucun fichier du jeu n'est distribué avec le mod.
+- Pack PopTracker : icônes, images des planètes et cartes de niveau du jeu, via le
+  [Ratchet & Clank Wiki](https://ratchetandclank.fandom.com) (Fandom) ; carte de la galaxie et cadres générés.
 - **Déclaration IA** : projet développé avec l'aide d'une IA (Claude, Anthropic). Le logo, l'emblème et l'icône
   du client sont des images générées par IA.
 - Ratchet & Clank est une marque de Sony Interactive Entertainment ; projet de fan sans lien avec Sony ni

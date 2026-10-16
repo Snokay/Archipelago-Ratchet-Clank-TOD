@@ -42,7 +42,10 @@ Restart RPCS3.
 4. As soon as Ratchet appears on Kerwan, the galactic map opens and you are sent to your starting planet.
 
 Options: starting planet (or random by difficulty), device unlocks, gold bolts required for the final planet,
-number of level-up checks.
+number of level-up checks, weapon level checks, progressive weapons.
+
+**Updating**: copy the new `BCES00052_patch.yml` over the old one and check that the **Archipelago** patch is still
+ticked in RPCS3 (the patch is applied when the game starts).
 
 ---
 

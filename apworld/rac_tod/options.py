@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, DeathLink, DefaultOnToggle, PerGameCommonOptions, Range
+from Options import Choice, DeathLink, DefaultOnToggle, PerGameCommonOptions, Range, Toggle
 
 
 class StartingPlanet(Choice):
@@ -59,6 +59,18 @@ class PlayerLevels(Range):
     default = 20
 
 
+class WeaponLevelChecks(DefaultOnToggle):
+    """Each weapon level-up (V2 to V5) of a shuffled weapon is a check."""
+    display_name = "Weapon Level Checks"
+
+
+class ProgressiveWeapons(Toggle):
+    """Each weapon is shuffled 5 times: the first copy gives the weapon, each next copy allows one more level
+    (V2 to V5). Without it, a weapon cannot level up past what you received (its XP keeps counting).
+    Needs the RPCS3 patch v0.7."""
+    display_name = "Progressive Weapons"
+
+
 @dataclass
 class ToDOptions(PerGameCommonOptions):
     starting_planet: StartingPlanet
@@ -66,5 +78,7 @@ class ToDOptions(PerGameCommonOptions):
     device_unlocks: DeviceUnlocks
     gold_bolts_required: GoldBoltsRequired
     player_levels: PlayerLevels
+    weapon_level_checks: WeaponLevelChecks
+    progressive_weapons: ProgressiveWeapons
     # Pas encore géré par le client (DeathLink prévu, voir PLAN.md).
     death_link: DeathLink
