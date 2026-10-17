@@ -119,7 +119,7 @@ Installation : voir le **[guide d'installation](SETUP_GUIDE.md)**.
 - Code : Snokayy, licence MIT ([LICENSE](LICENSE)). Aucun fichier du jeu n'est distribué avec le mod.
 - Pack PopTracker : icônes, images des planètes et cartes de niveau du jeu, via le
   [Ratchet & Clank Wiki](https://ratchetandclank.fandom.com) (Fandom) ; carte de la galaxie et cadres générés.
-- **Déclaration IA** : projet développé avec l'aide d'une IA (Claude, Anthropic)., détails dans [AI_DISCLOSURE.md](AI_DISCLOSURE.md) Le logo, l'emblème et l'icône
+- **Déclaration IA** : projet développé avec l'aide d'une IA (Claude, Anthropic), détails dans [AI_DISCLOSURE.md](AI_DISCLOSURE.md) Le logo, l'emblème et l'icône
   du client sont des images générées par IA.
 - Ratchet & Clank est une marque de Sony Interactive Entertainment ; projet de fan sans lien avec Sony ni
   Insomniac Games.
