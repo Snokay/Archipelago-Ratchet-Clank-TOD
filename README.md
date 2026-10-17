@@ -1,6 +1,6 @@
 # Ratchet & Clank Future: Tools of Destruction Archipelago — alpha 0.9.1.1
 
-### 📖 [Setup guide / Guide d'installation](SETUP_GUIDE.md) · ⬇️ [Download / Télécharger](../../releases) · 💬 [Discord](https://discord.gg/yqKUMMkWhr)
+### 📖 [Setup guide / Guide d'installation](SETUP_GUIDE.md) · 🤖 [AI disclosure / Déclaration IA](AI_DISCLOSURE.md) · ⬇️ [Download / Télécharger](../../releases) · 💬 [Discord](https://discord.gg/yqKUMMkWhr)
 
 *(Version française plus bas)*
 
@@ -59,7 +59,7 @@ Install: see the **[setup guide](SETUP_GUIDE.md)** (apworld, RPCS3 patch, IPC se
   through its IPC server (PINE protocol) and the RPCS3 patch contains only our own code.
 - PopTracker pack: item icons, planet pictures and level maps come from the game, through the
   [Ratchet & Clank Wiki](https://ratchetandclank.fandom.com) (Fandom); the galaxy map and frames are generated.
-- **AI disclosure**: this project was developed with the help of an AI assistant (Claude, Anthropic). The logo,
+- **AI disclosure**: this project was developed with the help of an AI assistant (Claude, Anthropic); details in [AI_DISCLOSURE.md](AI_DISCLOSURE.md). The logo,
   emblem and client icon are AI-generated images.
 - Ratchet & Clank is a trademark of Sony Interactive Entertainment; this fan project is not affiliated with Sony
   or Insomniac Games.
@@ -119,7 +119,7 @@ Installation : voir le **[guide d'installation](SETUP_GUIDE.md)**.
 - Code : Snokayy, licence MIT ([LICENSE](LICENSE)). Aucun fichier du jeu n'est distribué avec le mod.
 - Pack PopTracker : icônes, images des planètes et cartes de niveau du jeu, via le
   [Ratchet & Clank Wiki](https://ratchetandclank.fandom.com) (Fandom) ; carte de la galaxie et cadres générés.
-- **Déclaration IA** : projet développé avec l'aide d'une IA (Claude, Anthropic). Le logo, l'emblème et l'icône
+- **Déclaration IA** : projet développé avec l'aide d'une IA (Claude, Anthropic)., détails dans [AI_DISCLOSURE.md](AI_DISCLOSURE.md) Le logo, l'emblème et l'icône
   du client sont des images générées par IA.
 - Ratchet & Clank est une marque de Sony Interactive Entertainment ; projet de fan sans lien avec Sony ni
   Insomniac Games.
